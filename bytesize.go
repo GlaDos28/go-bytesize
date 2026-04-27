@@ -1,7 +1,7 @@
-// Package bytesize provides functionality for measuring and formatting  byte
-// sizes.
+// Package bytesize provides functionality for measuring and formatting byte
+// sizes according to IEC standard.
 //
-// You can also perfom mathmatical operation with ByteSize's and the result
+// You can also perform mathematical operation with ByteSize's and the result
 // will be a valid ByteSize with the correct size suffix.
 package bytesize
 
@@ -24,15 +24,25 @@ import (
 // ByteSize represents a number of bytes
 type ByteSize uint64
 
-// Byte size size suffixes.
+// Byte size 10^N suffixes. These names respect IEC standard.
 const (
 	B  ByteSize = 1
-	KB ByteSize = 1 << (10 * iota)
-	MB
-	GB
-	TB
-	PB
-	EB
+	KB          = 1000 * B
+	MB          = 1000 * KB
+	GB          = 1000 * MB
+	TB          = 1000 * GB
+	PB          = 1000 * TB
+	EB          = 1000 * PB
+)
+
+// Byte size 2^N suffixes. These names respect IEC standard.
+const (
+	KiB ByteSize = 1 << (10 * (iota + 1))
+	MiB
+	GiB
+	TiB
+	PiB
+	EiB
 )
 
 // Used for returning long unit form of string representation.
@@ -44,6 +54,13 @@ var longUnitMap = map[ByteSize]string{
 	TB: "terabyte",
 	PB: "petabyte",
 	EB: "exabyte",
+
+	KiB: "kibibyte",
+	MiB: "mebibyte",
+	GiB: "gibibyte",
+	TiB: "tebibyte",
+	PiB: "pebibyte",
+	EiB: "exbibyte",
 }
 
 // Used for returning string representation.
@@ -55,9 +72,17 @@ var shortUnitMap = map[ByteSize]string{
 	TB: "TB",
 	PB: "PB",
 	EB: "EB",
+
+	KiB: "KiB",
+	MiB: "MiB",
+	GiB: "GiB",
+	TiB: "TiB",
+	PiB: "PiB",
+	EiB: "EiB",
 }
 
-// Used to convert user input to ByteSize
+// Used to convert user input to ByteSize.
+// All keys must be in upper case.
 var unitMap = map[string]ByteSize{
 	"B":     B,
 	"BYTE":  B,
@@ -86,6 +111,30 @@ var unitMap = map[string]ByteSize{
 	"EB":       EB,
 	"EXABYTE":  EB,
 	"EXABYTES": EB,
+
+	"KIB":       KiB,
+	"KIBIBYTE":  KiB,
+	"KIBIBYTES": KiB,
+
+	"MIB":       MiB,
+	"MEBIBYTE":  MiB,
+	"MEBIBYTES": MiB,
+
+	"GIB":       GiB,
+	"GIBIBYTE":  GiB,
+	"GIBIBYTES": GiB,
+
+	"TIB":       TiB,
+	"TEBIBYTE":  TiB,
+	"TEBIBYTES": TiB,
+
+	"PIB":       PiB,
+	"PEBIBYTE":  PiB,
+	"PEBIBYTES": PiB,
+
+	"EIB":       EiB,
+	"EXBIBYTE":  EiB,
+	"EXBIBYTES": EiB,
 }
 
 var (
@@ -117,13 +166,13 @@ func Parse(s string) (ByteSize, error) {
 
 	// Check to see if we split successfully
 	if len(split) != 2 {
-		return 0, errors.New("Unrecognized size suffix")
+		return 0, errors.New("unrecognized size suffix")
 	}
 
 	// Check for MB, MEGABYTE, and MEGABYTES
 	unit, ok := unitMap[strings.ToUpper(split[1])]
 	if !ok {
-		return 0, errors.New("Unrecognized size suffix " + split[1])
+		return 0, errors.New("unrecognized size suffix " + split[1])
 
 	}
 
