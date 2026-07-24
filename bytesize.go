@@ -201,7 +201,23 @@ func (b *ByteSize) Type() string { return "byte_size" }
 
 // Satisfy the encoding.TextMarshaler interface.
 func (b ByteSize) MarshalText() ([]byte, error) {
-	return []byte(b.String()), nil
+	stringRepr := b.String()
+
+	// To prevent data loss of lesser digits when marshalling into text, for instance, in 1.239MB -> 1.24MB,
+	// We check that parsed string representation equals original value.
+	// If not, use precise text format with «B» suffix.
+	// TODO: more efficient approach checking digits directly, without double conversion
+	parsedRepr, err := Parse(stringRepr)
+	if err != nil {
+		panic(err)
+	}
+
+	if b == parsedRepr {
+		return []byte(stringRepr), nil
+	} else {
+		preciseStringRepr := fmt.Sprintf("%dB", uint64(b))
+		return []byte(preciseStringRepr), nil
+	}
 }
 
 // Satisfy the encoding.TextUnmarshaler interface.
